@@ -19,8 +19,10 @@ A Go implementation of the [Bowling Kata++](https://docs.google.com/a/pivotal.io
   bowl score < my-game.txt
   ```
 
-## Not yet implemented
+## Working features
 - Generating the blank score file
+
+## Not yet implemented
 - Scoring
   - Simple games
   - Games with spares

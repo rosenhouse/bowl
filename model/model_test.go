@@ -24,6 +24,38 @@ var _ = Describe("Scoring", func() {
 			59,
 			68,
 		}))
+	})
+
+	Describe("scoring a single frame, based on the following one", func() {
+		var frames []model.Frame
+
+		Context("when the frame is not a spare or strike", func() {
+			BeforeEach(func() {
+				frames = []model.Frame{
+					{'8', '1'},
+					{'3', '3'},
+				}
+			})
+
+			It("scores the frame by itself", func() {
+				score := model.ScoreFrame(frames)
+				Expect(score).To(Equal(9))
+			})
+		})
+
+		Context("when the frame is a spare", func() {
+			BeforeEach(func() {
+				frames = []model.Frame{
+					{'8', '/'},
+					{'3', '3'},
+				}
+			})
+
+			It("scores the frame as 10 plus the first throw of the following frame", func() {
+				score := model.ScoreFrame(frames)
+				Expect(score).To(Equal(13))
+			})
+		})
 
 	})
 })

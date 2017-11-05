@@ -24,4 +24,19 @@ var _ = Describe("Scoring", func() {
 		outString := strings.TrimSpace(string(session.Out.Contents()))
 		Expect(outString).To(Equal(getFixture("simple-output")))
 	})
+
+	It("scores a game with spares (but only 2 throws in the 10th frame)", func() {
+		var err error
+		cmd := exec.Command(binPath, "score")
+
+		cmd.Stdin = strings.NewReader(getFixture("complex-input"))
+
+		session, err := gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+		Expect(err).NotTo(HaveOccurred())
+
+		Eventually(session).Should(gexec.Exit(0))
+
+		outString := strings.TrimSpace(string(session.Out.Contents()))
+		Expect(outString).To(Equal(getFixture("complex-output")))
+	})
 })

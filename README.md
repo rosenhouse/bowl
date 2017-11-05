@@ -21,10 +21,10 @@ A Go implementation of the [Bowling Kata++](https://docs.google.com/a/pivotal.io
 
 ## Working features
 - Generating the blank score file
+- Scoring simple games
 
 ## Not yet implemented
-- Scoring
-  - Simple games
+- Scoring non-simple games
   - Games with spares
   - Games with strikes
   - Games with 3 throws in the final frame

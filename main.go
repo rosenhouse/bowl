@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/rosenhouse/bowl/application"
+	"github.com/rosenhouse/bowl/model"
 	"github.com/rosenhouse/bowl/ui"
 )
 
@@ -32,5 +33,14 @@ func (c *CommandNew) Run() string {
 type CommandScore struct{}
 
 func (c *CommandScore) Run(userRecord string) (scoredBoard string, err error) {
-	return "not implemented", nil
+	game, err := ui.ParseScorecard(userRecord)
+	if err != nil {
+		return "", fmt.Errorf("parsing: %s", err)
+	}
+	scoredGame, err := model.Score(game)
+	if err != nil {
+		return "", fmt.Errorf("scoring: %s", err)
+	}
+	scoredBoard = ui.Output(scoredGame)
+	return scoredBoard, nil
 }

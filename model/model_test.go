@@ -39,4 +39,19 @@ var _ = Describe("Frames", func() {
 		Entry("10th frame: spare oops", []Throw{3, ThrowSpare, 0}, 10),
 		Entry("10th frame: meh", []Throw{3, 6}, 9),
 	)
+
+	DescribeTable("scoring a frame, given its followers",
+		func(frames []Frame, expected int) {
+			Expect(ScoreFrames(frames)).To(Equal(expected))
+		},
+		Entry("meh", []Frame{{7, 1}, {3, 1}}, 8),
+		Entry("spare, meh", []Frame{{3, ThrowSpare}, {3, 1}}, 13),
+		Entry("spare, strike", []Frame{{3, ThrowSpare}, {ThrowStrike}, {1, 3}}, 20),
+		Entry("strike, meh", []Frame{{ThrowStrike}, {3, 1}}, 14),
+		Entry("strike, spare", []Frame{{ThrowStrike}, {3, ThrowSpare}}, 20),
+		Entry("strike, strike, meh", []Frame{{ThrowStrike}, {ThrowStrike}, {3, 5}}, 23),
+		Entry("strike, strike, spare", []Frame{{ThrowStrike}, {ThrowStrike}, {3, ThrowSpare}}, 23),
+		Entry("strike, strike, strike", []Frame{{ThrowStrike}, {ThrowStrike}, {ThrowStrike}, {5}}, 30),
+	)
+
 })

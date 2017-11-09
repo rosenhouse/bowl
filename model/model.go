@@ -47,3 +47,24 @@ func (f Frame) PinsDownTotal() int {
 		panic("invalid frame")
 	}
 }
+
+func (f Frame) IsSpare() bool {
+	return len(f) == 2 && f[1] == ThrowSpare
+}
+
+func (f Frame) IsStrike() bool {
+	return len(f) == 1 && f[0] == ThrowStrike
+}
+
+func ScoreFrames(s []Frame) int {
+	if s[0].IsStrike() {
+		if s[1].IsStrike() {
+			return 20 + s[2].PinsDownInFirstThrow()
+		}
+		return 10 + s[1].PinsDownTotal()
+	}
+	if s[0].IsSpare() {
+		return 10 + s[1].PinsDownInFirstThrow()
+	}
+	return s[0].PinsDownTotal()
+}

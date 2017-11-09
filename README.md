@@ -22,7 +22,7 @@ A Go implementation of the [Bowling Kata++](https://docs.google.com/a/pivotal.io
 ## Working features
 - Generating the blank score file
 - Scoring simple games
-- Games with spares
+- Games with spares (but not in the 10th frame)
 
 ## Not yet implemented
 - Scoring non-simple games

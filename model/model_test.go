@@ -26,7 +26,7 @@ var _ = Describe("Scoring", func() {
 		}))
 	})
 
-	Describe("scoring a single frame, based on the following one", func() {
+	Describe("scoring a single frame, based on the following ones", func() {
 		var frames []model.Frame
 
 		Context("when the frame is not a spare or strike", func() {
@@ -54,6 +54,62 @@ var _ = Describe("Scoring", func() {
 			It("scores the frame as 10 plus the first throw of the following frame", func() {
 				score := model.ScoreFrame(frames)
 				Expect(score).To(Equal(13))
+			})
+		})
+
+		Context("when there's a strike followed by a simple frame", func() {
+			BeforeEach(func() {
+				frames = []model.Frame{
+					{' ', 'X'},
+					{'5', '2'},
+				}
+			})
+
+			It("scores the first frame as 10 plus the next two throws", func() {
+				score := model.ScoreFrame(frames)
+				Expect(score).To(Equal(17))
+			})
+		})
+
+		Context("when there's a strike followed by a spare", func() {
+			BeforeEach(func() {
+				frames = []model.Frame{
+					{' ', 'X'},
+					{'5', '/'},
+				}
+			})
+
+			It("scores the first frame as 20", func() {
+				score := model.ScoreFrame(frames)
+				Expect(score).To(Equal(20))
+			})
+		})
+
+		Context("when there's a strike followed by a simple frame", func() {
+			BeforeEach(func() {
+				frames = []model.Frame{
+					{' ', 'X'},
+					{'5', '2'},
+				}
+			})
+
+			It("scores the first frame as 10 plus the next two throws", func() {
+				score := model.ScoreFrame(frames)
+				Expect(score).To(Equal(17))
+			})
+		})
+
+		Context("when there's a spare followed by a strike", func() {
+			BeforeEach(func() {
+				frames = []model.Frame{
+					{'5', '/'},
+					{' ', 'X'},
+				}
+			})
+
+			It("scores the first frame as 20", func() {
+				score := model.ScoreFrame(frames)
+				Expect(score).To(Equal(20))
 			})
 		})
 

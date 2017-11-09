@@ -16,6 +16,21 @@ func (t Throw) AsNumber() int {
 	return n
 }
 
+func (f Frame) IsSpare() bool {
+	return f[1] == MarkSpare
+}
+
+func (f Frame) IsStrike() bool {
+	return f[1] == MarkStrike
+}
+
+func (f Frame) PinsDownTotal() int {
+	if f.IsSpare() || f.IsStrike() {
+		return 10
+	}
+	return f[0].AsNumber() + f[1].AsNumber()
+}
+
 type ScoredGame struct {
 	Game
 	Scores []int
@@ -35,10 +50,21 @@ func Score(game Game) (ScoredGame, error) {
 }
 
 const MarkSpare = Throw('/')
+const MarkStrike = Throw('X')
+const MarkNoThrow = Throw(' ')
 
 func ScoreFrame(frames []Frame) int {
-	if frames[0][1] == MarkSpare {
+	if frames[0].IsStrike() {
+		if frames[1].IsSpare() {
+			return 20
+		}
+		return 10 + frames[1].PinsDownTotal()
+	}
+	if frames[0].IsSpare() {
+		if frames[1].IsStrike() {
+			return 20
+		}
 		return 10 + frames[1][0].AsNumber()
 	}
-	return frames[0][0].AsNumber() + frames[0][1].AsNumber()
+	return frames[0].PinsDownTotal()
 }

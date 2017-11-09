@@ -8,7 +8,13 @@ const ThrowSpare = Throw(0xBBBB)
 type Frame []Throw
 
 func (f Frame) PinsDownInFirstThrow() int {
-	panic("not implemented")
+	if len(f) < 1 {
+		return -1
+	}
+	if f[0] == ThrowStrike {
+		return 10
+	}
+	return int(f[0])
 }
 
 func (f Frame) PinsDownTotal() int {

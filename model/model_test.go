@@ -8,50 +8,38 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Frames", func() {
-	DescribeTable("PinsDownInFirstThrow",
-		func(frame Frame, expected int) {
-			Expect(frame.PinsDownInFirstThrow()).To(Equal(expected))
+var _ = Describe("NonFinalFrame", func() {
+	DescribeTable("PinsKnockedDown",
+		func(frame Frame, expected []int) {
+			Expect(frame.PinsKnockedDown()).To(Equal(expected))
 		},
-		Entry("frame not started", []Throw{}, -1),
-		Entry("gutter ball", []Throw{0}, 0),
-		Entry("zeros", []Throw{0, 0}, 0),
-		Entry("bagel disabled", []Throw{1, 0}, 1),
-		Entry("not bad", []Throw{8, 1}, 8),
-		Entry("strike", []Throw{ThrowStrike}, 10),
-	)
+		Entry("zeros", NonFinalFrame{0, 0}, []int{0, 0}),
+		Entry("bagel disabled", NonFinalFrame{1, 0}, []int{1, 0}),
+		Entry("not bad", NonFinalFrame{8, 1}, []int{8, 1}),
+		Entry("not bad", NonFinalFrame{8, ThrowSpare}, []int{8, 2}),
+		Entry("strike", NonFinalFrame{ThrowStrike}, []int{10}),
 
-	DescribeTable("PinsDownTotal",
-		func(frame Frame, expected int) {
-			Expect(frame.PinsDownTotal()).To(Equal(expected))
-		},
-		Entry("frame not started", []Throw{}, -1),
-		Entry("incomplete frame", []Throw{8}, -1),
-		Entry("zeros", []Throw{0, 0}, 0),
-		Entry("bagel disabled", []Throw{0, 1}, 1),
-		Entry("not bad", []Throw{8, 1}, 9),
-		Entry("spare", []Throw{4, ThrowSpare}, 10),
-		Entry("strike", []Throw{ThrowStrike}, 10),
-		Entry("10th frame: max score", []Throw{ThrowStrike, ThrowStrike, ThrowStrike}, 30),
-		Entry("10th frame: almost max", []Throw{ThrowStrike, ThrowStrike, 7}, 27),
-		Entry("10th frame: spare strike", []Throw{3, ThrowSpare, ThrowStrike}, 20),
-		Entry("10th frame: spare ok", []Throw{3, ThrowSpare, 2}, 12),
-		Entry("10th frame: spare oops", []Throw{3, ThrowSpare, 0}, 10),
-		Entry("10th frame: meh", []Throw{3, 6}, 9),
+		Entry("final frame: max score", FinalFrame{ThrowStrike, ThrowStrike, ThrowStrike}, []int{10, 10, 10}),
+		Entry("final frame: almost max", FinalFrame{ThrowStrike, ThrowStrike, 7}, []int{10, 10, 7}),
+		Entry("final frame: spare strike", FinalFrame{3, ThrowSpare, ThrowStrike}, []int{3, 7, 10}),
+		Entry("final frame: spare ok", FinalFrame{3, ThrowSpare, 2}, []int{3, 7, 2}),
+		Entry("final frame: spare oops", FinalFrame{3, ThrowSpare, 0}, []int{3, 7, 0}),
+		Entry("final frame: meh", FinalFrame{3, 6}, []int{3, 6}),
 	)
 
 	DescribeTable("scoring a frame, given its followers",
 		func(frames []Frame, expected int) {
 			Expect(ScoreFrames(frames)).To(Equal(expected))
 		},
-		Entry("meh", []Frame{{7, 1}, {3, 1}}, 8),
-		Entry("spare, meh", []Frame{{3, ThrowSpare}, {3, 1}}, 13),
-		Entry("spare, strike", []Frame{{3, ThrowSpare}, {ThrowStrike}, {1, 3}}, 20),
-		Entry("strike, meh", []Frame{{ThrowStrike}, {3, 1}}, 14),
-		Entry("strike, spare", []Frame{{ThrowStrike}, {3, ThrowSpare}}, 20),
-		Entry("strike, strike, meh", []Frame{{ThrowStrike}, {ThrowStrike}, {3, 5}}, 23),
-		Entry("strike, strike, spare", []Frame{{ThrowStrike}, {ThrowStrike}, {3, ThrowSpare}}, 23),
-		Entry("strike, strike, strike", []Frame{{ThrowStrike}, {ThrowStrike}, {ThrowStrike}, {5}}, 30),
+		Entry("meh", []Frame{NonFinalFrame{7, 1}, NonFinalFrame{3, 1}}, 8),
+		Entry("spare, meh", []Frame{NonFinalFrame{3, ThrowSpare}, NonFinalFrame{3, 1}}, 13),
+		Entry("spare, strike", []Frame{NonFinalFrame{3, ThrowSpare}, NonFinalFrame{ThrowStrike}, NonFinalFrame{1, 3}}, 20),
+		Entry("strike, meh", []Frame{NonFinalFrame{ThrowStrike}, NonFinalFrame{3, 1}}, 14),
+		Entry("strike, spare", []Frame{NonFinalFrame{ThrowStrike}, NonFinalFrame{3, ThrowSpare}}, 20),
+		Entry("strike, strike, meh", []Frame{NonFinalFrame{ThrowStrike}, NonFinalFrame{ThrowStrike}, NonFinalFrame{3, 5}}, 23),
+		Entry("strike, strike, meh", []Frame{NonFinalFrame{ThrowStrike}, NonFinalFrame{ThrowStrike}, FinalFrame{3, 5}}, 23),
+		Entry("strike, strike, spare", []Frame{NonFinalFrame{ThrowStrike}, NonFinalFrame{ThrowStrike}, NonFinalFrame{3, ThrowSpare}}, 23),
+		Entry("strike, strike, strike", []Frame{NonFinalFrame{ThrowStrike}, NonFinalFrame{ThrowStrike}, NonFinalFrame{ThrowStrike}}, 30),
+		Entry("strike, strike, strike, meh", []Frame{NonFinalFrame{ThrowStrike}, FinalFrame{ThrowStrike, ThrowStrike, 3}}, 30),
 	)
-
 })

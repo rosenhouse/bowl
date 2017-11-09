@@ -15,56 +15,78 @@ func (t Throw) PinsDown() int {
 	return int(t)
 }
 
-type Frame []Throw
+type NonFinalFrame []Throw
 
-func (f Frame) PinsDownInFirstThrow() int {
-	if len(f) < 1 {
-		return -1
-	}
-	return f[0].PinsDown()
-}
-
-func (f Frame) PinsDownTotal() int {
-	switch len(f) {
-	case 0:
-		return -1
-	case 1:
-		if f[0] == ThrowStrike {
-			return 10
-		}
-		return -1
-	case 2:
-		if f[1] == ThrowSpare {
-			return 10
-		}
-		return int(f[0]) + int(f[1])
-	case 3: // 10th frame
-		if f[1] == ThrowSpare {
-			return 10 + f[2].PinsDown()
-		}
-		return 20 + f[2].PinsDown()
-	default:
-		panic("invalid frame")
-	}
-}
-
-func (f Frame) IsSpare() bool {
+func (f NonFinalFrame) IsSpare() bool {
 	return len(f) == 2 && f[1] == ThrowSpare
 }
 
-func (f Frame) IsStrike() bool {
+func (f NonFinalFrame) IsStrike() bool {
 	return len(f) == 1 && f[0] == ThrowStrike
 }
 
+func (f NonFinalFrame) PinsKnockedDown() []int {
+	p := []int{f[0].PinsDown()}
+	if f[0] == ThrowStrike {
+		return p
+	}
+	if f[1] == ThrowSpare {
+		p = append(p, 10-p[0])
+	} else {
+		p = append(p, f[1].PinsDown())
+	}
+	return p
+}
+
+type FinalFrame []Throw
+
+func (f FinalFrame) PinsKnockedDown() []int {
+	p := []int{f[0].PinsDown()}
+	if f[1] == ThrowSpare {
+		p = append(p, 10-p[0])
+	} else {
+		p = append(p, f[1].PinsDown())
+	}
+	if p[0]+p[1] >= 10 {
+		p = append(p, f[2].PinsDown())
+	}
+	return p
+}
+
+type Frame interface {
+	PinsKnockedDown() []int
+}
+
+func ComputePinsKnockedDown(frames []Frame) []int {
+	var p []int
+	for _, frame := range frames {
+		p = append(p, frame.PinsKnockedDown()...)
+	}
+	return p
+}
+
+func sum(xs []int) int {
+	var total = 0
+	for _, x := range xs {
+		total += x
+	}
+	return total
+}
+
 func ScoreFrames(s []Frame) int {
-	if s[0].IsStrike() {
-		if s[1].IsStrike() {
-			return 20 + s[2].PinsDownInFirstThrow()
+	pinsKnockedDown := ComputePinsKnockedDown(s)
+	switch f := s[0].(type) {
+	case NonFinalFrame:
+		if f.IsStrike() {
+			return 10 + pinsKnockedDown[1] + pinsKnockedDown[2]
 		}
-		return 10 + s[1].PinsDownTotal()
+		if f.IsSpare() {
+			return 10 + pinsKnockedDown[2]
+		}
+		return sum(f.PinsKnockedDown())
+	case FinalFrame:
+		return sum(f.PinsKnockedDown())
+	default:
+		panic("unrecognized frame type")
 	}
-	if s[0].IsSpare() {
-		return 10 + s[1].PinsDownInFirstThrow()
-	}
-	return s[0].PinsDownTotal()
 }

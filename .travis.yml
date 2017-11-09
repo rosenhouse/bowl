@@ -1,0 +1,12 @@
+language: go
+sudo: false
+
+install:
+ - go get -t ./...
+ - go install github.com/onsi/ginkgo/ginkgo
+
+script:
+ - ginkgo -r -p -v -randomizeSuites -randomizeAllSpecs
+
+notifications:
+  email: false
